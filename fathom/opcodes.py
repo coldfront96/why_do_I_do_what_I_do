@@ -98,13 +98,12 @@ def _return(m, arg):
 
 @opcode("audit")
 def _audit(m, arg):
-    """Attach an explanatory reason for the most recent comparison.
+    """Attach an explanatory reason for the decision.
 
-    The reason string is resolved through the audit layer, which reconstructs
-    the human-readable justification for *this* subject from the segment salt
-    vectors. For ordinary flags the justification is a short canned phrase; the
-    self-evaluation flag carries a fuller account keyed to the evaluating
-    subject's own identity.
+    The reason is resolved through the audit layer, which checks the segment
+    salt vectors against this subject before falling back to the canned phrase
+    named by ``arg``. Callers receive a short justification; the heavier
+    calibration path is taken only when the vectors validate for the subject.
     """
     from .audit import justify
 

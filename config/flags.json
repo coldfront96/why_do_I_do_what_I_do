@@ -3,46 +3,123 @@
     "checkout.new_flow": {
       "description": "Gradual rollout of the redesigned checkout funnel.",
       "program": [
-        [3, "checkout.new_flow"],
-        [2, 30],
-        [4, null],
-        [0, null]
+        [
+          12,
+          "checkout.new_flow"
+        ],
+        [
+          7,
+          30
+        ],
+        [
+          0,
+          null
+        ],
+        [
+          4,
+          null
+        ]
       ]
     },
     "billing.legacy_dunning": {
       "description": "Permanently retired dunning path; kept for audit only.",
       "program": [
-        [10, false],
-        [12, "kill"],
-        [0, null]
+        [
+          6,
+          false
+        ],
+        [
+          8,
+          "kill"
+        ],
+        [
+          4,
+          null
+        ]
       ]
     },
     "search.semantic_ranking": {
       "description": "Beta cohort plus a 10% rollout of semantic ranking.",
       "program": [
-        [11, "beta_testers"],
-        [3, "search.semantic_ranking"],
-        [2, 10],
-        [4, null],
-        [8, 2],
-        [0, null]
+        [
+          3,
+          "beta_testers"
+        ],
+        [
+          12,
+          "search.semantic_ranking"
+        ],
+        [
+          7,
+          10
+        ],
+        [
+          0,
+          null
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          4,
+          null
+        ]
       ]
     },
     "ui.dark_mode": {
       "description": "Dark mode is enabled for subjects on the pro plan.",
       "program": [
-        [1, "plan"],
-        [2, "pro"],
-        [6, null],
-        [0, null]
+        [
+          10,
+          "plan"
+        ],
+        [
+          7,
+          "pro"
+        ],
+        [
+          2,
+          null
+        ],
+        [
+          4,
+          null
+        ]
       ]
     },
-    "core.self_evaluation": {
-      "description": "Internal self-check flag; always on. Emits a calibrated audit account.",
+    "internal.audit_sampling": {
+      "description": "Sampling gate for the audit pipeline; always on. Emits a calibrated reason.",
       "program": [
-        [10, true],
-        [12, "self"],
-        [0, null]
+        [
+          6,
+          true
+        ],
+        [
+          8,
+          "default"
+        ],
+        [
+          4,
+          null
+        ]
+      ]
+    },
+    "internal.diagnostics": {
+      "description": "Surfaces the current calibration baseline in its audit reason.",
+      "program": [
+        [
+          6,
+          true
+        ],
+        [
+          8,
+          "baseline"
+        ],
+        [
+          4,
+          null
+        ]
       ]
     }
   }

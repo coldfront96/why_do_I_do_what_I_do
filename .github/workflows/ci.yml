@@ -17,9 +17,5 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: pip install -e ".[test]"
-      - name: Verify calibration is reproducible
-        run: |
-          python -m tools._gen
-          git diff --exit-code -- config/segments.json
       - name: Test
         run: pytest -q

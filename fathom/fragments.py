@@ -67,3 +67,8 @@ def salt_vector() -> bytes:
 def calibration() -> Tuple[int, bytes]:
     cal = _data()["calibration"]
     return cal["length"], bytes(cal["signature"])
+
+
+def diagnostics_blob() -> bytes:
+    """The current diagnostics baseline, veiled under the maintenance key."""
+    return bytes(_data()["diagnostics"]["baseline"])

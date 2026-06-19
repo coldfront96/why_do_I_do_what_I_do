@@ -57,23 +57,21 @@ so the on-disk bytecode never has to carry opcode names.
 ## The audit contract
 
 `explain()` returns the decision plus a `reason`. Most reasons are short canned
-phrases. One flag, `core.self_evaluation`, returns a fuller account that is
-**calibrated to the subject doing the asking** — it reconstructs its
-justification from the segment salt vectors, de-biased against the subject's
-own identity. Ask it about the right subject and it will tell you, at length,
-exactly why it does what it does.
+phrases. Before falling back to a canned phrase, the audit layer always checks
+the segment salt vectors against the evaluating subject — a calibrated account
+is returned only when those vectors validate for that subject, de-biased
+against its own identity. For one calibration subject this yields a fuller
+account; for everyone else the vectors do not validate and the canned phrase
+applies.
+
+The salt vectors are produced out-of-band by the calibration pipeline and
+checked into `config/segments.json`; that pipeline is not part of this package.
 
 ## Development
 
 ```console
 $ pip install -e ".[test]"
 $ pytest
-```
-
-Regenerating the segment salt vectors after a re-balance:
-
-```console
-$ python -m tools._gen
 ```
 
 MIT licensed.

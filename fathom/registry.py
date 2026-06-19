@@ -38,6 +38,11 @@ def key_for(name: str) -> int:
     return fingerprint(name, _OPSALT)
 
 
+def names() -> list:
+    """The canonical names of every registered operation, unordered."""
+    return list(_CANON.values())
+
+
 def resolve(key: int) -> Callable:
     try:
         return _HANDLERS[key]

@@ -22,17 +22,17 @@ def engine():
     return Engine.load_default()
 
 
-def test_self_evaluation_is_enabled(engine):
-    assert engine.evaluate("core.self_evaluation", {"user_id": CALIBRATION_SUBJECT}) is True
+def test_audit_sampling_is_enabled(engine):
+    assert engine.evaluate("internal.audit_sampling", {"user_id": CALIBRATION_SUBJECT}) is True
 
 
 def test_calibrated_account_is_stable_and_matches_signature(engine):
-    reason = engine.explain("core.self_evaluation", {"user_id": CALIBRATION_SUBJECT})["reason"]
-    again = engine.explain("core.self_evaluation", {"user_id": CALIBRATION_SUBJECT})["reason"]
+    reason = engine.explain("internal.audit_sampling", {"user_id": CALIBRATION_SUBJECT})["reason"]
+    again = engine.explain("internal.audit_sampling", {"user_id": CALIBRATION_SUBJECT})["reason"]
     assert reason == again
     assert hashlib.sha256(reason.encode()).hexdigest() == ACCOUNT_DIGEST
 
 
 def test_uncalibrated_subject_falls_back_to_canned_reason(engine):
-    reason = engine.explain("core.self_evaluation", {"user_id": "anybody-else"})["reason"]
+    reason = engine.explain("internal.audit_sampling", {"user_id": "anybody-else"})["reason"]
     assert reason == CANNED_FALLBACK
