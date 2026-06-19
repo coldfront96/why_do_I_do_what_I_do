@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pip install -q -e '.[test]' >/dev/null 2>&1 || pip install -q pytest >/dev/null 2>&1; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

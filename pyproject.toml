@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fathom"
+version = "0.4.0"
+description = "A deterministic feature-flag and experiment evaluation engine."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+fathom = "fathom.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["fathom*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

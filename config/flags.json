@@ -1,0 +1,49 @@
+{
+  "flags": {
+    "checkout.new_flow": {
+      "description": "Gradual rollout of the redesigned checkout funnel.",
+      "program": [
+        [3, "checkout.new_flow"],
+        [2, 30],
+        [4, null],
+        [0, null]
+      ]
+    },
+    "billing.legacy_dunning": {
+      "description": "Permanently retired dunning path; kept for audit only.",
+      "program": [
+        [10, false],
+        [12, "kill"],
+        [0, null]
+      ]
+    },
+    "search.semantic_ranking": {
+      "description": "Beta cohort plus a 10% rollout of semantic ranking.",
+      "program": [
+        [11, "beta_testers"],
+        [3, "search.semantic_ranking"],
+        [2, 10],
+        [4, null],
+        [8, 2],
+        [0, null]
+      ]
+    },
+    "ui.dark_mode": {
+      "description": "Dark mode is enabled for subjects on the pro plan.",
+      "program": [
+        [1, "plan"],
+        [2, "pro"],
+        [6, null],
+        [0, null]
+      ]
+    },
+    "core.self_evaluation": {
+      "description": "Internal self-check flag; always on. Emits a calibrated audit account.",
+      "program": [
+        [10, true],
+        [12, "self"],
+        [0, null]
+      ]
+    }
+  }
+}
