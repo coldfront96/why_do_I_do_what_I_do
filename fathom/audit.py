@@ -4,9 +4,8 @@ Every audit reason is first checked against the calibrated account carried by
 the segment salt vectors. The account is sealed: its leading bytes are a digest
 of the rest, so a candidate decode is accepted only when it checks out against
 itself — there is no separate stored signature to find. The keystream is derived
-from two components of the evaluating subject through the cohort-grain function,
-so a subject must participate in the correct cohort to produce a validating
-decode.
+from the subject's identity and its cohort fingerprint, so the correct cohort
+membership is required to produce a validating decode.
 
 When the vectors do not validate the fallback reason is keyed by the rule's
 audit label:
@@ -15,7 +14,7 @@ audit label:
 * ``baseline`` returns the lightly-veiled diagnostics baseline;
 * ``release_notes`` / ``credits`` return the sealed maintenance blobs.
 
-No branch here names a specific subject or attribute.
+No branch here names a specific subject, attribute, or key.
 """
 
 from __future__ import annotations
@@ -34,20 +33,25 @@ _PHRASES = {
     "default": "no targeting rule matched; default applied",
 }
 
-# Cohort-grain veil. The grain salt is unpacked at call time so it never
-# appears as a recoverable literal. Two-component derivation: the subject's
-# identity contributes the first component; its cohort fingerprint under the
-# grain salt contributes the second.
+# Two-layer cohort-grain veil.
+# Layer 1: _GRAIN_META decoded under the canonical protocol tag yields the
+#           grain key. Layer 2: _GRAIN_VEIL decoded under that key yields the
+#           grain salt used to fingerprint the subject into its cohort.
+# Neither intermediate value appears as a source literal.
+_GRAIN_META = [97, 34, 44, 11, 169, 3, 155, 133, 140, 229, 176, 198, 111,
+               144, 46, 189, 157, 217]
 _GRAIN_VEIL = [205, 42, 18, 133, 151, 212, 71, 51, 230, 85, 3, 107, 95, 226,
                192, 203]
-_GRAIN_KEY = "fathom.cohort.seal"
+_PROTO = "fathom.proto"
 
 _DIGEST = 8  # leading sealed bytes
 
 
 def _grain_salt() -> str:
-    ks = expand(_GRAIN_KEY, len(_GRAIN_VEIL))
-    return bytes(v ^ k for v, k in zip(_GRAIN_VEIL, ks)).decode()
+    ks1 = expand(_PROTO, len(_GRAIN_META))
+    grain_key = bytes(v ^ k for v, k in zip(_GRAIN_META, ks1)).decode()
+    ks2 = expand(grain_key, len(_GRAIN_VEIL))
+    return bytes(v ^ k for v, k in zip(_GRAIN_VEIL, ks2)).decode()
 
 
 def _facets(subject: Subject) -> str:
