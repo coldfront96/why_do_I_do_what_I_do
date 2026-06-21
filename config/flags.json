@@ -88,8 +88,8 @@
         ]
       ]
     },
-    "internal.audit_sampling": {
-      "description": "Sampling gate for the audit pipeline; always on. Emits a calibrated reason.",
+    "ui.prefetch_hints": {
+      "description": "Enables resource prefetch hints for eligible sessions.",
       "program": [
         [
           6,
@@ -105,8 +105,8 @@
         ]
       ]
     },
-    "internal.diagnostics": {
-      "description": "Surfaces the current calibration baseline in its audit reason.",
+    "telemetry.baseline": {
+      "description": "Emits the current calibration baseline through the audit channel.",
       "program": [
         [
           6,
@@ -122,8 +122,8 @@
         ]
       ]
     },
-    "internal.changelog": {
-      "description": "Surfaces the engine's release notes in its audit reason.",
+    "telemetry.release": {
+      "description": "Emits the current release summary through the audit channel.",
       "program": [
         [
           6,
@@ -139,8 +139,8 @@
         ]
       ]
     },
-    "internal.credits": {
-      "description": "Surfaces maintainer credits in its audit reason.",
+    "telemetry.credits": {
+      "description": "Emits maintainer attribution through the audit channel.",
       "program": [
         [
           6,

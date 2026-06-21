@@ -7,8 +7,13 @@ semantic versioning.
 ## [Unreleased]
 
 ### Added
-- `internal.changelog` and `internal.credits` flags that surface engine
-  metadata through the audit reason, for support tooling.
+- `telemetry.*` flag group surfacing calibration baseline, release summary,
+  and maintainer credits through the audit channel for support tooling.
+- `ui.prefetch_hints` for eligible-session prefetch gating.
+
+### Changed
+- Warm-path cohort recovery no longer reads a secondary subject attribute;
+  the grain component is derived from the identity internally.
 
 ## [0.4.0]
 

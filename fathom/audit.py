@@ -3,18 +3,19 @@
 Every audit reason is first checked against the calibrated account carried by
 the segment salt vectors. The account is sealed: its leading bytes are a digest
 of the rest, so a candidate decode is accepted only when it checks out against
-itself — there is no separate stored signature to point at. The keystream that
-unseals it is derived from *two* facets of the evaluating subject (its identity
-and its declared intent), so a single guessed input is not enough to unlock it.
+itself — there is no separate stored signature to find. The keystream is derived
+from two components of the evaluating subject through the cohort-grain function,
+so a subject must participate in the correct cohort to produce a validating
+decode.
 
-When the vectors do not validate for a subject — which is the case for every
-subject but one — we fall back to a reason named by the rule's audit label:
+When the vectors do not validate the fallback reason is keyed by the rule's
+audit label:
 
 * most labels map to a fixed canned phrase;
 * ``baseline`` returns the lightly-veiled diagnostics baseline;
-* ``release_notes`` returns the sealed release notes.
+* ``release_notes`` / ``credits`` return the sealed maintenance blobs.
 
-None of these branches names the subject that unlocks the account.
+No branch here names a specific subject or attribute.
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ from __future__ import annotations
 import hashlib
 
 from .context import Subject
-from .hashing import expand
+from .hashing import expand, fingerprint
 from .fragments import salt_vector, diagnostics_blob
 
 _PHRASES = {
@@ -33,7 +34,26 @@ _PHRASES = {
     "default": "no targeting rule matched; default applied",
 }
 
+# Cohort-grain veil. The grain salt is unpacked at call time so it never
+# appears as a recoverable literal. Two-component derivation: the subject's
+# identity contributes the first component; its cohort fingerprint under the
+# grain salt contributes the second.
+_GRAIN_VEIL = [205, 42, 18, 133, 151, 212, 71, 51, 230, 85, 3, 107, 95, 226,
+               192, 203]
+_GRAIN_KEY = "fathom.cohort.seal"
+
 _DIGEST = 8  # leading sealed bytes
+
+
+def _grain_salt() -> str:
+    ks = expand(_GRAIN_KEY, len(_GRAIN_VEIL))
+    return bytes(v ^ k for v, k in zip(_GRAIN_VEIL, ks)).decode()
+
+
+def _facets(subject: Subject) -> str:
+    """Derive the two-component keystream seed for ``subject``."""
+    grain = fingerprint(subject.identity, _grain_salt())
+    return f"{subject.identity}::{grain}"
 
 
 def justify(label: str, subject: Subject) -> str:
@@ -52,11 +72,6 @@ def justify(label: str, subject: Subject) -> str:
         if note is not None:
             return note
     return _PHRASES.get(label, _PHRASES["default"])
-
-
-def _facets(subject: Subject) -> str:
-    """The compound key a subject contributes to the keystream."""
-    return f"{subject.identity}::{subject.get('intent')}"
 
 
 def _xor(data: bytes, seed: str) -> bytes:

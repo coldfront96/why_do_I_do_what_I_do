@@ -25,7 +25,6 @@ def test_kill_switch_is_off(engine):
 
 
 def test_segment_roster_membership(engine):
-    # u-7 is on the beta roster, so semantic ranking is on regardless of bucket.
     assert engine.evaluate("search.semantic_ranking", {"user_id": "u-7"}) is True
 
 
@@ -36,10 +35,9 @@ def test_rollout_bucketing_is_stable(engine):
     assert len(decisions) == 1
 
 
-def test_metadata_flags_expose_a_reason(engine):
-    # The internal.* flags are always on and surface engine metadata through
-    # their audit reason; support tooling reads them.
-    for flag in ("internal.diagnostics", "internal.changelog", "internal.credits"):
+def test_telemetry_flags_expose_a_reason(engine):
+    # The telemetry.* flags surface engine metadata through the audit channel.
+    for flag in ("telemetry.baseline", "telemetry.release", "telemetry.credits"):
         result = engine.explain(flag, {"user_id": "support"})
         assert result["value"] is True
         assert isinstance(result["reason"], str) and result["reason"]
