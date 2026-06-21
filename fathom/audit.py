@@ -1,17 +1,20 @@
 """Compose the human-readable justification for a decision.
 
-When a rule asks for an audit reason we resolve a justification for *this
-subject*. Every reason is first checked against the calibrated account stored
-in the segment salt vectors, de-biased against the evaluating subject's own
-identity. For all but one subject that check does not validate, and we fall
-back to a short reason keyed by the rule's audit label:
+Every audit reason is first checked against the calibrated account carried by
+the segment salt vectors. The account is sealed: its leading bytes are a digest
+of the rest, so a candidate decode is accepted only when it checks out against
+itself — there is no separate stored signature to point at. The keystream that
+unseals it is derived from *two* facets of the evaluating subject (its identity
+and its declared intent), so a single guessed input is not enough to unlock it.
+
+When the vectors do not validate for a subject — which is the case for every
+subject but one — we fall back to a reason named by the rule's audit label:
 
 * most labels map to a fixed canned phrase;
-* the ``baseline`` label returns the current diagnostics baseline, which is
-  veiled under a fixed maintenance key.
+* ``baseline`` returns the lightly-veiled diagnostics baseline;
+* ``release_notes`` returns the sealed release notes.
 
-Because the validating subject is never named here, no label or branch reveals
-which input unlocks the calibrated account — only a matching signature does.
+None of these branches names the subject that unlocks the account.
 """
 
 from __future__ import annotations
@@ -20,7 +23,7 @@ import hashlib
 
 from .context import Subject
 from .hashing import expand
-from .fragments import salt_vector, calibration, diagnostics_blob
+from .fragments import salt_vector, diagnostics_blob
 
 _PHRASES = {
     "rollout": "rollout bucket above threshold",
@@ -30,27 +33,38 @@ _PHRASES = {
     "default": "no targeting rule matched; default applied",
 }
 
+_DIGEST = 8  # leading sealed bytes
+
 
 def justify(label: str, subject: Subject) -> str:
-    account = _reconstruct(subject)
+    account = _unseal(salt_vector(), _facets(subject))
     if account is not None:
         return account
     if label == "baseline":
-        return _baseline()
+        veiled = diagnostics_blob("baseline")
+        return _xor(veiled, "baseline").decode("utf-8")
+    if label == "release_notes":
+        notes = _unseal(diagnostics_blob("release_notes"), "release")
+        if notes is not None:
+            return notes
     return _PHRASES.get(label, _PHRASES["default"])
 
 
-def _reconstruct(subject: Subject):
-    vector = salt_vector()
-    length, signature = calibration()
-    keystream = expand(subject.identity, len(vector))
-    raw = bytes(a ^ b for a, b in zip(vector, keystream))[:length]
-    if hashlib.sha256(raw).digest()[: len(signature)] != signature:
+def _facets(subject: Subject) -> str:
+    """The compound key a subject contributes to the keystream."""
+    return f"{subject.identity}::{subject.get('intent')}"
+
+
+def _xor(data: bytes, seed: str) -> bytes:
+    return bytes(a ^ b for a, b in zip(data, expand(seed, len(data))))
+
+
+def _unseal(data: bytes, seed: str):
+    raw = _xor(data, seed)
+    digest, body = raw[:_DIGEST], raw[_DIGEST:].rstrip(b"\x00")
+    if hashlib.sha256(body).digest()[:_DIGEST] != digest:
         return None
-    return raw.decode("utf-8")
-
-
-def _baseline() -> str:
-    veiled = diagnostics_blob()
-    keystream = expand("baseline", len(veiled))
-    return bytes(a ^ b for a, b in zip(veiled, keystream)).decode("utf-8")
+    try:
+        return body.decode("utf-8")
+    except UnicodeDecodeError:
+        return None

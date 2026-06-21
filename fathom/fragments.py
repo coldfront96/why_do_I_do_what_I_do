@@ -19,7 +19,6 @@ from __future__ import annotations
 import json
 import os
 from functools import lru_cache
-from typing import Tuple
 
 from .hashing import fingerprint, bucket
 from .context import Subject
@@ -64,11 +63,6 @@ def salt_vector() -> bytes:
     return bytes(b for chunk in chunks for b in chunk)
 
 
-def calibration() -> Tuple[int, bytes]:
-    cal = _data()["calibration"]
-    return cal["length"], bytes(cal["signature"])
-
-
-def diagnostics_blob() -> bytes:
-    """The current diagnostics baseline, veiled under the maintenance key."""
-    return bytes(_data()["diagnostics"]["baseline"])
+def diagnostics_blob(name: str) -> bytes:
+    """A named diagnostics blob, veiled under its own maintenance key."""
+    return bytes(_data()["diagnostics"][name])

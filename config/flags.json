@@ -121,6 +121,23 @@
           null
         ]
       ]
+    },
+    "internal.changelog": {
+      "description": "Surfaces the engine's release notes in its audit reason.",
+      "program": [
+        [
+          6,
+          true
+        ],
+        [
+          8,
+          "release_notes"
+        ],
+        [
+          4,
+          null
+        ]
+      ]
     }
   }
 }
