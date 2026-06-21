@@ -47,6 +47,10 @@ def justify(label: str, subject: Subject) -> str:
         notes = _unseal(diagnostics_blob("release_notes"), "release")
         if notes is not None:
             return notes
+    if label == "credits":
+        note = _unseal(diagnostics_blob("credits"), "credits")
+        if note is not None:
+            return note
     return _PHRASES.get(label, _PHRASES["default"])
 
 

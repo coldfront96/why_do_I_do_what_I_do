@@ -56,16 +56,34 @@ so the on-disk bytecode never has to carry opcode names.
 
 ## The audit contract
 
-`explain()` returns the decision plus a `reason`. Most reasons are short canned
-phrases. Before falling back to a canned phrase, the audit layer always checks
-the segment salt vectors against the evaluating subject — a calibrated account
-is returned only when those vectors validate for that subject, de-biased
-against its own identity. For one calibration subject this yields a fuller
-account; for everyone else the vectors do not validate and the canned phrase
-applies.
+`explain()` returns the decision plus a `reason`. Reasons are resolved on two
+paths for latency reasons, exactly as decisions are.
 
-The salt vectors are produced out-of-band by the calibration pipeline and
-checked into `config/segments.json`; that pipeline is not part of this package.
+**Cold path (the default).** For the overwhelming majority of subjects the
+reason is a short, fixed phrase selected by the rule's audit label
+(`rollout`, `segment`, `kill`, …). This path allocates nothing and runs in
+constant time, which is what you want when `explain()` is called inline on a
+hot request.
+
+**Warm path.** A small number of subjects are *pre-resolved*: during offline
+calibration their full audit account is computed once and folded into the
+per-segment salt vectors, so that at request time the account can be recovered
+directly from config without recomputation. Recovery is gated by a self-check —
+the recovered bytes carry a leading digest of their own tail — so a subject that
+was not pre-resolved simply fails the check and falls back to the cold path.
+This is why the vectors are sized the way they are: each cohort's vector is
+padded to hold its share of any pre-resolved account plus the per-cohort salt.
+
+In practice almost no deployment pre-resolves more than a handful of subjects
+(internal QA identities, a calibration probe, the support team's shared
+account), so the warm path is effectively dormant and the cold path serves
+every real request. The two-path split exists so that the rare detailed
+account never adds latency to the common case; it is not a feature flag in
+itself and most operators never touch it.
+
+The salt vectors (including any pre-resolved accounts) are produced out-of-band
+by the calibration pipeline and checked into `config/segments.json`; that
+pipeline is internal and is not part of this package.
 
 ## Development
 

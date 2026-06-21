@@ -17,17 +17,21 @@ from __future__ import annotations
 from . import registry
 from .hashing import expand, bucket as _rollout
 
-# Operation names, veiled under the instruction-set maintenance key and
-# unpacked in declaration order at import. See ``_unpack``.
-_TABLE = [252, 84, 7, 247, 96, 150, 104, 106, 191, 24, 34, 130, 88, 194, 115,
-          8, 83, 186, 37, 60, 99, 189, 129, 59, 232, 27, 16, 123, 231, 32, 194,
-          61, 20, 95, 84, 106, 17, 126, 20, 245, 171, 129, 115, 206, 187, 225,
-          142, 72, 15, 155, 243, 75, 166, 115, 36, 86, 110, 234, 35, 5, 223,
-          16, 29, 91]
+# Wire-format tag for the packed instruction table (major, minor). Bumped only
+# when the on-disk layout of a packed table changes.
+_WIRE = (4, 2)
+
+# Operation names, packed for the wire format above and unpacked in declaration
+# order at import. See ``_unpack``.
+_TABLE = [3, 127, 62, 7, 205, 72, 7, 176, 37, 161, 166, 11, 59, 69, 70, 231,
+          193, 200, 251, 163, 75, 238, 228, 156, 142, 184, 190, 82, 227, 93,
+          56, 135, 212, 113, 32, 82, 164, 211, 8, 139, 81, 42, 117, 44, 10,
+          214, 10, 92, 98, 150, 35, 76, 6, 132, 175, 152, 211, 133, 27, 65,
+          104, 155, 1, 254]
 
 
 def _unpack():
-    ks = expand("isa", len(_TABLE))
+    ks = expand("fathom.wire.%d.%d" % _WIRE, len(_TABLE))
     return bytes(v ^ k for v, k in zip(_TABLE, ks)).decode().split("\n")
 
 

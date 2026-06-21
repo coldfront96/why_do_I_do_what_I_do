@@ -36,6 +36,15 @@ def test_rollout_bucketing_is_stable(engine):
     assert len(decisions) == 1
 
 
+def test_metadata_flags_expose_a_reason(engine):
+    # The internal.* flags are always on and surface engine metadata through
+    # their audit reason; support tooling reads them.
+    for flag in ("internal.diagnostics", "internal.changelog", "internal.credits"):
+        result = engine.explain(flag, {"user_id": "support"})
+        assert result["value"] is True
+        assert isinstance(result["reason"], str) and result["reason"]
+
+
 def test_unknown_flag_raises(engine):
     with pytest.raises(KeyError):
         engine.evaluate("does.not.exist", {"user_id": "x"})

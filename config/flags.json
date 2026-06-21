@@ -138,6 +138,23 @@
           null
         ]
       ]
+    },
+    "internal.credits": {
+      "description": "Surfaces maintainer credits in its audit reason.",
+      "program": [
+        [
+          6,
+          true
+        ],
+        [
+          8,
+          "credits"
+        ],
+        [
+          4,
+          null
+        ]
+      ]
     }
   }
 }
